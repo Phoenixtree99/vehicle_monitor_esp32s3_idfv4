@@ -680,3 +680,17 @@
 /Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/esp-idf/main/CMakeFiles/install.dir
 /Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/esp-idf/main/CMakeFiles/install/local.dir
 /Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/esp-idf/main/CMakeFiles/install/strip.dir
+/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/esp-idf/lvgl/CMakeFiles/__idf_lvgl.dir
+/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/esp-idf/lvgl/CMakeFiles/edit_cache.dir
+/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/esp-idf/lvgl/CMakeFiles/rebuild_cache.dir
+/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/esp-idf/lvgl/CMakeFiles/list_install_components.dir
+/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/esp-idf/lvgl/CMakeFiles/install.dir
+/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/esp-idf/lvgl/CMakeFiles/install/local.dir
+/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/esp-idf/lvgl/CMakeFiles/install/strip.dir
+/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/esp-idf/lvgl_esp32_drivers/CMakeFiles/__idf_lvgl_esp32_drivers.dir
+/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/esp-idf/lvgl_esp32_drivers/CMakeFiles/edit_cache.dir
+/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/esp-idf/lvgl_esp32_drivers/CMakeFiles/rebuild_cache.dir
+/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/esp-idf/lvgl_esp32_drivers/CMakeFiles/list_install_components.dir
+/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/esp-idf/lvgl_esp32_drivers/CMakeFiles/install.dir
+/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/esp-idf/lvgl_esp32_drivers/CMakeFiles/install/local.dir
+/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/esp-idf/lvgl_esp32_drivers/CMakeFiles/install/strip.dir

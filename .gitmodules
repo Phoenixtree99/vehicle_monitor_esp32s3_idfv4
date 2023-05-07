@@ -1,0 +1,3 @@
+[submodule "components/NMEA0183_Parse"]
+	path = components/NMEA0183_Parse
+	url = git@github.com:Phoenixtree99/NMEA0183_Parse.git

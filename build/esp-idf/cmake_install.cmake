@@ -122,6 +122,8 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   include("/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/esp-idf/ulp/cmake_install.cmake")
   include("/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/esp-idf/wifi_provisioning/cmake_install.cmake")
   include("/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/esp-idf/main/cmake_install.cmake")
+  include("/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/esp-idf/lvgl/cmake_install.cmake")
+  include("/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/esp-idf/lvgl_esp32_drivers/cmake_install.cmake")
 
 endif()
 

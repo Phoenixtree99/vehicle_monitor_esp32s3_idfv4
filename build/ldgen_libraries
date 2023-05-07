@@ -71,3 +71,5 @@
 /Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/esp-idf/ulp/libulp.a
 /Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/esp-idf/wifi_provisioning/libwifi_provisioning.a
 /Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/esp-idf/main/libmain.a
+/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/esp-idf/lvgl/liblvgl.a
+/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/esp-idf/lvgl_esp32_drivers/liblvgl_esp32_drivers.a
