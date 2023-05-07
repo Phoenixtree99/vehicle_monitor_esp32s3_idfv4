@@ -1,13 +1,13 @@
 # Target labels
  bootloader
 # Source files and their labels
-/Users/luyetong/esp32_code/uart_async_rxtxtasks/build/CMakeFiles/bootloader
-/Users/luyetong/esp32_code/uart_async_rxtxtasks/build/CMakeFiles/bootloader.rule
-/Users/luyetong/esp32_code/uart_async_rxtxtasks/build/CMakeFiles/bootloader-complete.rule
-/Users/luyetong/esp32_code/uart_async_rxtxtasks/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule
-/Users/luyetong/esp32_code/uart_async_rxtxtasks/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule
-/Users/luyetong/esp32_code/uart_async_rxtxtasks/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule
-/Users/luyetong/esp32_code/uart_async_rxtxtasks/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule
-/Users/luyetong/esp32_code/uart_async_rxtxtasks/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule
-/Users/luyetong/esp32_code/uart_async_rxtxtasks/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule
-/Users/luyetong/esp32_code/uart_async_rxtxtasks/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule
+/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/CMakeFiles/bootloader
+/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/CMakeFiles/bootloader.rule
+/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/CMakeFiles/bootloader-complete.rule
+/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule
+/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule
+/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule
+/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule
+/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule
+/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule
+/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule

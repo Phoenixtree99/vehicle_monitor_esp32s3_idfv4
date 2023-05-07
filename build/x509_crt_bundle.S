@@ -1,4 +1,4 @@
-/* * Data converted from /Users/luyetong/esp32_code/uart_async_rxtxtasks/build/esp-idf/mbedtls/x509_crt_bundle
+/* * Data converted from /Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/esp-idf/mbedtls/x509_crt_bundle
  */
 .data
 .section .rodata.embedded

@@ -39,7 +39,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/Users/luyetong/esp32_code/uart_async_rxtxtasks/build/bootloader/esp-idf/soc/esp32s3/cmake_install.cmake")
+  include("/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/bootloader/esp-idf/soc/esp32s3/cmake_install.cmake")
 
 endif()
 

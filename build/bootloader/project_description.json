@@ -1,8 +1,8 @@
 {
     "project_name":       "bootloader",
     "project_path":       "/Users/luyetong/esp/esp-idf/components/bootloader/subproject",
-    "build_dir":          "/Users/luyetong/esp32_code/uart_async_rxtxtasks/build/bootloader",
-    "config_file":        "/Users/luyetong/esp32_code/uart_async_rxtxtasks/sdkconfig",
+    "build_dir":          "/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/bootloader",
+    "config_file":        "/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/sdkconfig",
     "config_defaults":    "",
     "app_elf":            "bootloader.elf",
     "app_bin":            "bootloader.bin",

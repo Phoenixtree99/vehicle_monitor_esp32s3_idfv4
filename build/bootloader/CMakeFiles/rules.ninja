@@ -299,7 +299,7 @@ rule C_STATIC_LIBRARY_LINKER____idf_main_
 # Rule for re-running cmake.
 
 rule RERUN_CMAKE
-  command = /usr/local/Cellar/cmake/3.25.1/bin/cmake --regenerate-during-build -S/Users/luyetong/esp/esp-idf/components/bootloader/subproject -B/Users/luyetong/esp32_code/uart_async_rxtxtasks/build/bootloader
+  command = /usr/local/Cellar/cmake/3.25.1/bin/cmake --regenerate-during-build -S/Users/luyetong/esp/esp-idf/components/bootloader/subproject -B/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/bootloader
   description = Re-running CMake...
   generator = 1
 
@@ -308,7 +308,7 @@ rule RERUN_CMAKE
 # Rule for cleaning all built files.
 
 rule CLEAN
-  command = /usr/local/bin/ninja $FILE_ARG -t clean $TARGETS
+  command = /Users/luyetong/.espressif/tools/ninja/1.10.2/ninja $FILE_ARG -t clean $TARGETS
   description = Cleaning all built files...
 
 
@@ -316,6 +316,6 @@ rule CLEAN
 # Rule for printing all primary targets available.
 
 rule HELP
-  command = /usr/local/bin/ninja -t targets
+  command = /Users/luyetong/.espressif/tools/ninja/1.10.2/ninja -t targets
   description = All primary targets available:
 
