@@ -8,7 +8,7 @@
 /Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/CMakeFiles/flash.dir
 /Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/CMakeFiles/encrypted-flash.dir
 /Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/CMakeFiles/_project_elf_src.dir
-/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/CMakeFiles/uart_async_rxtxtasks.elf.dir
+/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/CMakeFiles/vehicle_monitor_esp32s3_idfv4.elf.dir
 /Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/CMakeFiles/size.dir
 /Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/CMakeFiles/size-files.dir
 /Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/CMakeFiles/size-components.dir

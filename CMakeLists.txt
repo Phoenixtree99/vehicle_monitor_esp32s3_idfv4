@@ -3,4 +3,4 @@
 cmake_minimum_required(VERSION 3.5)
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
-project(uart_async_rxtxtasks)
+project(vehicle_monitor_esp32s3_idfv4)

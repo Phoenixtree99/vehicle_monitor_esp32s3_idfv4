@@ -6,7 +6,7 @@
 # It is included in the main 'build.ninja'.
 
 # =============================================================================
-# Project: uart_async_rxtxtasks
+# Project: vehicle_monitor_esp32s3_idfv4
 # Configurations: 
 # =============================================================================
 # =============================================================================
@@ -14,7 +14,7 @@
 #############################################
 # Rule for compiling C files.
 
-rule C_COMPILER__uart_async_rxtxtasks.2eelf_
+rule C_COMPILER__vehicle_monitor_esp32s3_idfv4.2eelf_
   depfile = $DEP_FILE
   deps = gcc
   command = /Users/luyetong/.espressif/tools/xtensa-esp32s3-elf/esp-2021r2-patch5-8.4.0/xtensa-esp32s3-elf/bin/xtensa-esp32s3-elf-gcc $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
@@ -24,7 +24,7 @@ rule C_COMPILER__uart_async_rxtxtasks.2eelf_
 #############################################
 # Rule for linking CXX executable.
 
-rule CXX_EXECUTABLE_LINKER__uart_async_rxtxtasks.2eelf_
+rule CXX_EXECUTABLE_LINKER__vehicle_monitor_esp32s3_idfv4.2eelf_
   command = $PRE_LINK && /Users/luyetong/.espressif/tools/xtensa-esp32s3-elf/esp-2021r2-patch5-8.4.0/xtensa-esp32s3-elf/bin/xtensa-esp32s3-elf-g++ $FLAGS $LINK_FLAGS $in -o $TARGET_FILE $LINK_PATH $LINK_LIBRARIES && $POST_BUILD
   description = Linking CXX executable $TARGET_FILE
   restat = $RESTAT

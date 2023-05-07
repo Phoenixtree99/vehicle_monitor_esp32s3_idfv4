@@ -5,5 +5,9 @@
     "board/esp32s3-builtin.cfg"
   ],
   "idf.port": "/dev/cu.usbmodem142201",
-  "idf.flashType": "JTAG"
+  "idf.flashType": "JTAG",
+  "files.associations": {
+    "lv_hal_tick.h": "c",
+    "lv_demos.h": "c"
+  }
 }

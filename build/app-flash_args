@@ -1,2 +1,2 @@
 --flash_mode dio --flash_freq 80m --flash_size 2MB
-0x10000 uart_async_rxtxtasks.bin
+0x10000 vehicle_monitor_esp32s3_idfv4.bin

@@ -3,6 +3,6 @@
 # project subdirectory.
 #
 
-PROJECT_NAME := uart_async_rxtxtasks
+PROJECT_NAME := vehicle_monitor_esp32s3_idfv4
 
 include $(IDF_PATH)/make/project.mk

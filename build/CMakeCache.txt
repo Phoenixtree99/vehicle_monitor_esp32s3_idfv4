@@ -165,7 +165,7 @@ CMAKE_PROJECT_DESCRIPTION:STATIC=
 CMAKE_PROJECT_HOMEPAGE_URL:STATIC=
 
 //Value Computed by CMake
-CMAKE_PROJECT_NAME:STATIC=uart_async_rxtxtasks
+CMAKE_PROJECT_NAME:STATIC=vehicle_monitor_esp32s3_idfv4
 
 //Path to a program.
 CMAKE_RANLIB:FILEPATH=/Users/luyetong/.espressif/tools/xtensa-esp32s3-elf/esp-2021r2-patch5-8.4.0/xtensa-esp32s3-elf/bin/xtensa-esp32s3-elf-ranlib
@@ -533,13 +533,13 @@ mbedtls_LIB_DEPENDS:STATIC=general;__idf_cxx;general;__idf_newlib;general;__idf_
 mbedx509_LIB_DEPENDS:STATIC=general;__idf_cxx;general;__idf_newlib;general;__idf_freertos;general;__idf_esp_hw_support;general;__idf_heap;general;__idf_log;general;__idf_lwip;general;__idf_soc;general;__idf_hal;general;__idf_esp_rom;general;__idf_esp_common;general;__idf_esp_system;general;__idf_esp32s3;general;mbedcrypto;
 
 //Value Computed by CMake
-uart_async_rxtxtasks_BINARY_DIR:STATIC=/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build
+vehicle_monitor_esp32s3_idfv4_BINARY_DIR:STATIC=/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build
 
 //Value Computed by CMake
-uart_async_rxtxtasks_IS_TOP_LEVEL:STATIC=ON
+vehicle_monitor_esp32s3_idfv4_IS_TOP_LEVEL:STATIC=ON
 
 //Value Computed by CMake
-uart_async_rxtxtasks_SOURCE_DIR:STATIC=/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4
+vehicle_monitor_esp32s3_idfv4_SOURCE_DIR:STATIC=/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4
 
 
 ########################
