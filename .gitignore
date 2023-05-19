@@ -1,4 +1,7 @@
 build/
+.vscode/
+
 *.bin
 *.hex
 *.obj
+*.DS_Store
