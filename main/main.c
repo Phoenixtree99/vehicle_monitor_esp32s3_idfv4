@@ -204,26 +204,85 @@ static void uart2_rx_task(void *arg)
     free(uart2_rx_data);
 }
 
-SemaphoreHandle_t xGuiSemaphore;// 创建一个GUI信号量
 static void lv_tick_task(void *arg)// LVGL 时钟任务
 {
    (void)arg;
    lv_tick_inc(10);
 }
 
-static void lvgl_task(void *arg)// GUI任务
+void lv_example_menu(void)
 {
-    xGuiSemaphore = xSemaphoreCreateMutex();// 创建GUI信号量
-    lv_init();          //lvgl初始化
-    lvgl_driver_init(); // 初始化液晶驱动
 
-    /* Example for 1) */
-    static lv_disp_draw_buf_t draw_buf;
+   lv_obj_t *cont;  // cont容器
+   lv_obj_t *label; // lable标签
+   /*Create a menu object*/
+   lv_obj_t *menu = lv_menu_create(lv_scr_act());                               // 创建菜单对象
+   lv_obj_set_size(menu, lv_disp_get_hor_res(NULL), lv_disp_get_ver_res(NULL)); // 设置大小
+   lv_obj_center(menu);                                                         // 居中显示
+
+   /*Create sub pages*/
+   lv_obj_t *sub_1_page = lv_menu_page_create(menu, "Page 1"); // 创建Page子菜单界面
+
+   cont = lv_menu_cont_create(sub_1_page);              // 创建菜单cont容器对象
+   label = lv_label_create(cont);                       // 创建label
+   lv_label_set_text(label, "Hello, I am hiding here"); // 设置label显示内容
+
+   lv_obj_t *sub_2_page = lv_menu_page_create(menu, "Page 2"); // 创建Page子菜单界面
+
+   cont = lv_menu_cont_create(sub_2_page);              // 创建菜单cont容器对象
+   label = lv_label_create(cont);                       // 创建label
+   lv_label_set_text(label, "Hello, I am hiding here"); // 设置label显示内容
+
+   lv_obj_t *sub_3_page = lv_menu_page_create(menu, "Page 3"); // 创建Page子菜单界面
+
+   cont = lv_menu_cont_create(sub_3_page);              // 创建菜单cont容器对象
+   label = lv_label_create(cont);                       // 创建label
+   lv_label_set_text(label, "Hello, I am hiding here"); // 设置label显示内容
+   /*Modify the header*/
+   lv_obj_t *back_btn = lv_menu_get_main_header_back_btn(menu); // 获取菜单头部返回键
+   lv_obj_t *back_btn_label = lv_label_create(back_btn);        // 在返回键上创建label
+   lv_label_set_text(back_btn_label, "Back");                   // 设置label显示内容
+
+   /*Create a main page*/
+   lv_obj_t *main_page = lv_menu_page_create(menu, NULL); // 创建菜单主界面
+
+   cont = lv_menu_cont_create(main_page);               // 创建菜单cont容器对象
+   label = lv_label_create(cont);                       // 创建label
+   lv_label_set_text(label, "Item 1 (Click me!)");      // 设置label显示内容
+   lv_menu_set_load_page_event(menu, cont, sub_1_page); // 加载cont到menu,设置跳转界面
+
+   cont = lv_menu_cont_create(main_page);               // 创建菜单主界面
+   label = lv_label_create(cont);                       // 创建菜单cont容器对象
+   lv_label_set_text(label, "Item 2 (Click me!)");      // 设置label显示内容
+   lv_menu_set_load_page_event(menu, cont, sub_2_page); // 加载cont到menu,设置跳转界面
+
+   cont = lv_menu_cont_create(main_page);               // 创建菜单主界面
+   label = lv_label_create(cont);                       // 创建菜单cont容器对象
+   lv_label_set_text(label, "Item 3 (Click me!)");      // 设置label显示内容
+   lv_menu_set_load_page_event(menu, cont, sub_3_page); // 加载cont到menu,设置跳转界面
+
+   lv_menu_set_page(menu, main_page); // 设置菜单主界面
+}
+
+SemaphoreHandle_t xGuiSemaphore;// 创建一个GUI信号量
+
+static void guiTask(void *pvParameter) {
+
+     (void) pvParameter;
+    xGuiSemaphore = xSemaphoreCreateMutex();// 创建GUI信号量
+
+    lv_init();          //lvgl初始化
+
+    lvgl_driver_init(); // 初始化液晶驱动
+    
     // 初始化缓存
-    lv_color_t *buf1 = heap_caps_malloc(DISP_BUF_SIZE * 2, MALLOC_CAP_DMA);
-    lv_color_t *buf2 = heap_caps_malloc(DISP_BUF_SIZE * 2, MALLOC_CAP_DMA);
+    // lv_color_t *buf1 = heap_caps_malloc(DISP_BUF_SIZE * 2, MALLOC_CAP_DMA);
+    // lv_color_t *buf2 = heap_caps_malloc(DISP_BUF_SIZE * 2, MALLOC_CAP_DMA);
+    lv_color_t *buf1 = heap_caps_malloc(DISP_BUF_SIZE * sizeof(lv_color_t), MALLOC_CAP_DMA);
+    lv_color_t *buf2 = heap_caps_malloc(DISP_BUF_SIZE * sizeof(lv_color_t), MALLOC_CAP_DMA);
 
     // 添加并注册触摸驱动
+    static lv_disp_draw_buf_t draw_buf;
     lv_disp_draw_buf_init(&draw_buf, buf1, buf2, LV_HOR_RES_MAX * LV_VER_RES_MAX); /*Initialize the display buffer*/
 
     static lv_disp_drv_t disp_drv;         /*A variable to hold the drivers. Must be static or global.*/
@@ -233,40 +292,24 @@ static void lvgl_task(void *arg)// GUI任务
     disp_drv.hor_res = 320;                /*Set the horizontal resolution in pixels*/
     disp_drv.ver_res = 240;                /*Set the vertical resolution in pixels*/
     lv_disp_drv_register(&disp_drv);       /*Register the driver and save the created display objects*/
+    
     /*触摸屏输入接口配置*/
     lv_indev_drv_t indev_drv;
     lv_indev_drv_init(&indev_drv);
     indev_drv.read_cb = touch_driver_read;
     indev_drv.type = LV_INDEV_TYPE_POINTER;
     lv_indev_drv_register(&indev_drv);
-   
+
     /* 创建一个10ms定时器*/// 定期处理GUI回调
     const esp_timer_create_args_t periodic_timer_args = {
         .callback = &lv_tick_task,
-        .name = "periodic_gui"};
+        .name = "periodic_gui"
+    };
     esp_timer_handle_t periodic_timer;
     ESP_ERROR_CHECK(esp_timer_create(&periodic_timer_args, &periodic_timer));
     ESP_ERROR_CHECK(esp_timer_start_periodic(periodic_timer, 10 * 1000));
 
-    static lv_obj_t *default_src;
-    default_src = lv_scr_act();		                        //获取默认屏幕
-    lv_obj_t * label = lv_label_create(default_src);        // 在主屏幕创建一个标签
-    lv_label_set_recolor(label, true);                      // 使能字符命令重新对字符上色
-    lv_obj_set_align(label, LV_FLEX_ALIGN_CENTER);			// 内容居中对齐
-    lv_label_set_long_mode(label, LV_LABEL_LONG_WRAP);		// 标签长内容框，保持控件宽度，内容过长就换行
-    // 设置显示文本（其中含颜色命令 #颜色上色内容# ）
-    lv_label_set_text(label, "#0000ff lvgl# #ff00ff LV_Label# #ff0000 Label# label "
-                            "lvgl_LV_Label");
-    lv_obj_set_width(label, 150);								// 设置标签宽度
-    lv_obj_align(label, LV_ALIGN_CENTER, 0, -60);		// 对齐到中心偏上
-
-    /////////////Label1 演示长文本动态滚动显示/////////
-    lv_obj_t * label2 = lv_label_create(default_src);	// 在主屏幕创建一个标签
-    lv_label_set_long_mode(label2, LV_LABEL_LONG_SCROLL_CIRCULAR);	// 标签长内容框，保持控件宽度，内容过长循环滚动
-    lv_obj_set_width(label2, 150);								// 设置标签宽度
-    lv_obj_set_height(label2, 50);
-    lv_label_set_text(label2, "lvgl_LV_Labellvgl_LV_Labellvgl_LV_Labellvgl_LV_Label ");// 设置显示文本
-    lv_obj_align(label2, LV_ALIGN_CENTER, 0, 0);			// 对齐到中心偏下
+    lv_example_menu();
 
    while (1)
    {
@@ -276,10 +319,17 @@ static void lvgl_task(void *arg)// GUI任务
       /* Try to take the semaphore, call lvgl related function on success */
       if (pdTRUE == xSemaphoreTake(xGuiSemaphore, portMAX_DELAY))
       {
-         lv_timer_handler();// 处理LVGL任务
+         lv_task_handler();// 处理LVGL任务
          xSemaphoreGive(xGuiSemaphore);// 释放信号量
       }
    }
+
+    /* A task should NEVER return */
+    free(buf1);
+#ifndef CONFIG_LV_TFT_DISPLAY_MONOCHROME
+    free(buf2);
+#endif
+    vTaskDelete(NULL);
 }
 
 void app_main(void)
@@ -292,5 +342,5 @@ void app_main(void)
     xTaskCreate(uart2_rx_task, "uart2_rx_task", 1024*2, NULL, configMAX_PRIORITIES, NULL);
     xTaskCreate(uart2_tx_task, "uart2_tx_task", 1024*2, NULL, configMAX_PRIORITIES-1, NULL);
 
-    xTaskCreatePinnedToCore(lvgl_task, "gui task", 1024 * 4, NULL, 1, NULL, 0);
+    xTaskCreatePinnedToCore(guiTask, "gui", 1024 * 4, NULL, 1, NULL, 0);
 }

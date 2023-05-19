@@ -46,9 +46,8 @@ CMAKE_ASM_FLAGS_RELEASE:STRING=-O3 -DNDEBUG
 //Flags used by the ASM compiler during RELWITHDEBINFO builds.
 CMAKE_ASM_FLAGS_RELWITHDEBINFO:STRING=-O2 -g -DNDEBUG
 
-//Choose the type of build, options are: None Debug Release RelWithDebInfo
-// MinSizeRel ...
-CMAKE_BUILD_TYPE:STRING=
+//No help, variable specified on the command line.
+CMAKE_BUILD_TYPE:STRING=Debug
 
 //A wrapper around 'ar' adding the appropriate '--plugin' option
 // for the GCC compiler
@@ -114,8 +113,8 @@ CMAKE_EXE_LINKER_FLAGS_RELEASE:STRING=
 //Flags used by the linker during RELWITHDEBINFO builds.
 CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO:STRING=
 
-//Enable/Disable output of compile commands during generation.
-CMAKE_EXPORT_COMPILE_COMMANDS:BOOL=
+//No help, variable specified on the command line.
+CMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE
 
 //Value Computed by CMake.
 CMAKE_FIND_PACKAGE_REDIRECTS_DIR:STATIC=/Users/luyetong/esp32_code/vehicle_monitor_esp32s3_idfv4/build/CMakeFiles/pkgRedirects
@@ -715,6 +714,8 @@ _Python3_EXECUTABLE:INTERNAL=/Users/luyetong/.espressif/python_env/idf4.4_py3.10
 //Python3 Properties
 _Python3_INTERPRETER_PROPERTIES:INTERNAL=Python;3;10;5;32;;;/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10;/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10;/Users/luyetong/.espressif/python_env/idf4.4_py3.10_env/lib/python3.10/site-packages;/Users/luyetong/.espressif/python_env/idf4.4_py3.10_env/lib/python3.10/site-packages
 _Python3_INTERPRETER_SIGNATURE:INTERNAL=ad9a812162ccb31e220fbfc032f9dc51
+//Interpreter reason failure
+_Python3_Interpreter_REASON_FAILURE:INTERNAL=
 //NumPy reason failure
 _Python3_NumPy_REASON_FAILURE:INTERNAL=
 

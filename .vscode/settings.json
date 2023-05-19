@@ -8,6 +8,10 @@
   "idf.flashType": "JTAG",
   "files.associations": {
     "lv_hal_tick.h": "c",
-    "lv_demos.h": "c"
+    "lv_demos.h": "c",
+    "lv_examples.h": "c",
+    "future": "c",
+    "system_error": "c",
+    "regex": "c"
   }
 }

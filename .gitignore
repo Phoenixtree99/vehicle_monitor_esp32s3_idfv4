@@ -1,1 +1,4 @@
 build
+.bin
+.hex
+.obj
