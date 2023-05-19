@@ -227,6 +227,7 @@ void lv_example_menu(void)
    label = lv_label_create(cont);                       // 创建label
    lv_label_set_text(label, "Hello, I am hiding here"); // 设置label显示内容
 
+    /*Create sub pages*/
    lv_obj_t *sub_2_page = lv_menu_page_create(menu, "Page 2"); // 创建Page子菜单界面
 
    cont = lv_menu_cont_create(sub_2_page);              // 创建菜单cont容器对象
