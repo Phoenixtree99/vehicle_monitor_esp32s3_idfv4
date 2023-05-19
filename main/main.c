@@ -212,57 +212,56 @@ static void lv_tick_task(void *arg)// LVGL 时钟任务
 
 void lv_example_menu(void)
 {
-
-   lv_obj_t *cont;  // cont容器
-   lv_obj_t *label; // lable标签
-   /*Create a menu object*/
-   lv_obj_t *menu = lv_menu_create(lv_scr_act());                               // 创建菜单对象
-   lv_obj_set_size(menu, lv_disp_get_hor_res(NULL), lv_disp_get_ver_res(NULL)); // 设置大小
-   lv_obj_center(menu);                                                         // 居中显示
-
-   /*Create sub pages*/
-   lv_obj_t *sub_1_page = lv_menu_page_create(menu, "Page 1"); // 创建Page子菜单界面
-
-   cont = lv_menu_cont_create(sub_1_page);              // 创建菜单cont容器对象
-   label = lv_label_create(cont);                       // 创建label
-   lv_label_set_text(label, "Hello, I am hiding here"); // 设置label显示内容
+    lv_obj_t *cont;  // cont容器
+    lv_obj_t *label; // lable标签
+    /*Create a menu object*/
+    lv_obj_t *menu = lv_menu_create(lv_scr_act());                               // 创建菜单对象
+    lv_obj_set_size(menu, lv_disp_get_hor_res(NULL), lv_disp_get_ver_res(NULL)); // 设置大小
+    lv_obj_center(menu);                                                         // 居中显示
 
     /*Create sub pages*/
-   lv_obj_t *sub_2_page = lv_menu_page_create(menu, "Page 2"); // 创建Page子菜单界面
+    lv_obj_t *sub_1_page = lv_menu_page_create(menu, "Page 1"); // 创建Page子菜单界面
 
-   cont = lv_menu_cont_create(sub_2_page);              // 创建菜单cont容器对象
-   label = lv_label_create(cont);                       // 创建label
-   lv_label_set_text(label, "Hello, I am hiding here"); // 设置label显示内容
+    cont = lv_menu_cont_create(sub_1_page);              // 创建菜单cont容器对象
+    label = lv_label_create(cont);                       // 创建label
+    lv_label_set_text(label, "Hello, I am hiding here"); // 设置label显示内容
 
-   lv_obj_t *sub_3_page = lv_menu_page_create(menu, "Page 3"); // 创建Page子菜单界面
+    /*Create sub pages*/
+    lv_obj_t *sub_2_page = lv_menu_page_create(menu, "Page 2"); // 创建Page子菜单界面
 
-   cont = lv_menu_cont_create(sub_3_page);              // 创建菜单cont容器对象
-   label = lv_label_create(cont);                       // 创建label
-   lv_label_set_text(label, "Hello, I am hiding here"); // 设置label显示内容
-   /*Modify the header*/
-   lv_obj_t *back_btn = lv_menu_get_main_header_back_btn(menu); // 获取菜单头部返回键
-   lv_obj_t *back_btn_label = lv_label_create(back_btn);        // 在返回键上创建label
-   lv_label_set_text(back_btn_label, "Back");                   // 设置label显示内容
+    cont = lv_menu_cont_create(sub_2_page);              // 创建菜单cont容器对象
+    label = lv_label_create(cont);                       // 创建label
+    lv_label_set_text(label, "Hello, I am hiding here"); // 设置label显示内容
 
-   /*Create a main page*/
-   lv_obj_t *main_page = lv_menu_page_create(menu, NULL); // 创建菜单主界面
+    lv_obj_t *sub_3_page = lv_menu_page_create(menu, "Page 3"); // 创建Page子菜单界面
 
-   cont = lv_menu_cont_create(main_page);               // 创建菜单cont容器对象
-   label = lv_label_create(cont);                       // 创建label
-   lv_label_set_text(label, "Item 1 (Click me!)");      // 设置label显示内容
-   lv_menu_set_load_page_event(menu, cont, sub_1_page); // 加载cont到menu,设置跳转界面
+    cont = lv_menu_cont_create(sub_3_page);              // 创建菜单cont容器对象
+    label = lv_label_create(cont);                       // 创建label
+    lv_label_set_text(label, "Hello, I am hiding here"); // 设置label显示内容
+    /*Modify the header*/
+    lv_obj_t *back_btn = lv_menu_get_main_header_back_btn(menu); // 获取菜单头部返回键
+    lv_obj_t *back_btn_label = lv_label_create(back_btn);        // 在返回键上创建label
+    lv_label_set_text(back_btn_label, "Back");                   // 设置label显示内容
 
-   cont = lv_menu_cont_create(main_page);               // 创建菜单主界面
-   label = lv_label_create(cont);                       // 创建菜单cont容器对象
-   lv_label_set_text(label, "Item 2 (Click me!)");      // 设置label显示内容
-   lv_menu_set_load_page_event(menu, cont, sub_2_page); // 加载cont到menu,设置跳转界面
+    /*Create a main page*/
+    lv_obj_t *main_page = lv_menu_page_create(menu, NULL); // 创建菜单主界面
 
-   cont = lv_menu_cont_create(main_page);               // 创建菜单主界面
-   label = lv_label_create(cont);                       // 创建菜单cont容器对象
-   lv_label_set_text(label, "Item 3 (Click me!)");      // 设置label显示内容
-   lv_menu_set_load_page_event(menu, cont, sub_3_page); // 加载cont到menu,设置跳转界面
+    cont = lv_menu_cont_create(main_page);               // 创建菜单cont容器对象
+    label = lv_label_create(cont);                       // 创建label
+    lv_label_set_text(label, "Item 1 (Click me!)");      // 设置label显示内容
+    lv_menu_set_load_page_event(menu, cont, sub_1_page); // 加载cont到menu,设置跳转界面
 
-   lv_menu_set_page(menu, main_page); // 设置菜单主界面
+    cont = lv_menu_cont_create(main_page);               // 创建菜单主界面
+    label = lv_label_create(cont);                       // 创建菜单cont容器对象
+    lv_label_set_text(label, "Item 2 (Click me!)");      // 设置label显示内容
+    lv_menu_set_load_page_event(menu, cont, sub_2_page); // 加载cont到menu,设置跳转界面
+
+    cont = lv_menu_cont_create(main_page);               // 创建菜单主界面
+    label = lv_label_create(cont);                       // 创建菜单cont容器对象
+    lv_label_set_text(label, "Item 3 (Click me!)");      // 设置label显示内容
+    lv_menu_set_load_page_event(menu, cont, sub_3_page); // 加载cont到menu,设置跳转界面
+
+    lv_menu_set_page(menu, main_page); // 设置菜单主界面
 }
 
 SemaphoreHandle_t xGuiSemaphore;// 创建一个GUI信号量
