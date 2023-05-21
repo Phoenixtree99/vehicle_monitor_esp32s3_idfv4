@@ -1,39 +1,65 @@
-/* UART asynchronous example, that uses separate RX and TX tasks
-
-   This example code is in the Public Domain (or CC0 licensed, at your option.)
-
-   Unless required by applicable law or agreed to in writing, this
-   software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-   CONDITIONS OF ANY KIND, either express or implied.
-*/
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_system.h"
 #include "esp_log.h"
 #include "driver/uart.h"
-#include "string.h"
 #include "driver/gpio.h"
 #include "mos_payload.h"
-#include "stdio.h"
-#include "stdlib.h"
+#include "nmea0183_parse.h"
+#include "display_menu.h"
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 
 #include "lvgl/demos/lv_demos.h"
 #include "lvgl_helpers.h"
 #include "lvgl/src/hal/lv_hal_tick.h"
+
+/*-------------------- DEFINE START --------------------*/
 
 #define RX_BUF_SIZE 1024
 #define TX_DATA_MAX_SIZE 1024
 
 Mos_Send_Payload_Object_t Send_Payload_Object = NULL;
 
+/* GPS_BD port */
 #define UART0_TXD_PIN (GPIO_NUM_43)
 #define UART0_RXD_PIN (GPIO_NUM_44)
 
+/* 4G DTU port */
 #define UART1_TXD_PIN (GPIO_NUM_4)
 #define UART1_RXD_PIN (GPIO_NUM_5)
 
+/* Zigbee port */
 #define UART2_TXD_PIN (GPIO_NUM_17)
-#define UART2_RXD_PIN (GPIO_NUM_16)
+// #define UART2_RXD_PIN (GPIO_NUM_16)
+#define UART2_RXD_PIN (GPIO_NUM_18)
+
+/*--------------------- DEFINE END ---------------------*/
+
+/*-------------------- GLOABLE VERIABLE START --------------------*/
+
+static GNRMC GNRMC_Info;
+
+int temperature = -999;
+int humidity = -999;
+
+char show_str[64];
+
+extern lv_obj_t *cont_temperature;  // temperature cont容器
+extern lv_obj_t *label_temperature; // temperature lable标签
+
+extern lv_obj_t *cont_humidity;  // humidity cont容器
+extern lv_obj_t *label_humidity; // humidity lable标签
+
+extern lv_obj_t *cont_position;  // latitude cont容器
+extern lv_obj_t *label_position; // latitude lable标签
+
+extern lv_obj_t *cont_position_status;  // longitude cont容器
+extern lv_obj_t *label_position_status; // longitude lable标签
+
+/*--------------------- GLOABLE VERIABLE END ---------------------*/
 
 void Mos_Send_Payload_Object_Init(Mos_Send_Payload_Object_t Send_Payload_Object)
 {
@@ -48,9 +74,10 @@ void Mos_Send_Payload_Object_Init(Mos_Send_Payload_Object_t Send_Payload_Object)
     Send_Payload_Object->env_params.speed = 35;
 }
 
+/*  UART1、UART2 和 UART3 串口初始化*/
 void uart_init(void) {
-    const uart_config_t uart_config = {
-        .baud_rate = 115200,
+    const uart_config_t uart0_config = {
+        .baud_rate = 9600,
         .data_bits = UART_DATA_8_BITS,
         .parity = UART_PARITY_DISABLE,
         .stop_bits = UART_STOP_BITS_1,
@@ -60,17 +87,35 @@ void uart_init(void) {
 
     // 开串口UART0
     uart_driver_install(UART_NUM_0, RX_BUF_SIZE * 2, 0, 0, NULL, 0);
-    uart_param_config(UART_NUM_0, &uart_config);
+    uart_param_config(UART_NUM_0, &uart0_config);
     uart_set_pin(UART_NUM_0, UART0_TXD_PIN, UART0_RXD_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+
+    const uart_config_t uart1_config = {
+        .baud_rate = 115200,
+        .data_bits = UART_DATA_8_BITS,
+        .parity = UART_PARITY_DISABLE,
+        .stop_bits = UART_STOP_BITS_1,
+        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
+        .source_clk = UART_SCLK_APB,
+    };
 
     // 开串口UART1
     uart_driver_install(UART_NUM_1, RX_BUF_SIZE * 2, 0, 0, NULL, 0);
-    uart_param_config(UART_NUM_1, &uart_config);
+    uart_param_config(UART_NUM_1, &uart1_config);
     uart_set_pin(UART_NUM_1, UART1_TXD_PIN, UART1_RXD_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+
+    const uart_config_t uart2_config = {
+        .baud_rate = 9600,
+        .data_bits = UART_DATA_8_BITS,
+        .parity = UART_PARITY_DISABLE,
+        .stop_bits = UART_STOP_BITS_1,
+        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
+        .source_clk = UART_SCLK_APB,
+    };
 
     // 开串口UART2
     uart_driver_install(UART_NUM_2, RX_BUF_SIZE * 2, 0, 0, NULL, 0);
-    uart_param_config(UART_NUM_2, &uart_config);
+    uart_param_config(UART_NUM_2, &uart2_config);
     uart_set_pin(UART_NUM_2, UART2_TXD_PIN, UART2_RXD_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
 }
 
@@ -129,7 +174,14 @@ static void uart1_tx_task(void *arg)
 {
     static const char *TX_TASK_TAG = "UART1_TX_TASK";
     esp_log_level_set(TX_TASK_TAG, ESP_LOG_INFO);
+
+    // static char json_string[TX_DATA_MAX_SIZE];
+    // Send_Payload_Object = (Mos_Send_Payload_Object_t)pvPortMalloc(sizeof(Mos_Send_Payload_Object));
+    // Mos_Send_Payload_Object_Init(Send_Payload_Object);
+
     while (1) {
+        // Mos_Send_Payload_Object_Init(Send_Payload_Object);
+        // serialize_string_to_jsom(json_string, Send_Payload_Object);
         uart1_sendData(TX_TASK_TAG, "Hello world");
         vTaskDelay(2000 / portTICK_PERIOD_MS);
     }
@@ -139,16 +191,9 @@ static void uart1_tx_task(void *arg)
 static void uart2_tx_task(void *arg)
 {
     static const char *TX_TASK_TAG = "UART2_TX_TASK";
-    esp_log_level_set(TX_TASK_TAG, ESP_LOG_INFO);
-
-    static char json_string[TX_DATA_MAX_SIZE];
-    Send_Payload_Object = (Mos_Send_Payload_Object_t)pvPortMalloc(sizeof(Mos_Send_Payload_Object));
-    Mos_Send_Payload_Object_Init(Send_Payload_Object);
-
+    esp_log_level_set(TX_TASK_TAG, ESP_LOG_INFO);    
     while (1) {  
-        Mos_Send_Payload_Object_Init(Send_Payload_Object);
-        serialize_string_to_jsom(json_string, Send_Payload_Object);
-        uart2_sendData(TX_TASK_TAG, json_string);
+        //uart2_sendData(TX_TASK_TAG, "Hello world");
         vTaskDelay(8000 / portTICK_PERIOD_MS);
     }
 }
@@ -163,8 +208,33 @@ static void uart0_rx_task(void *arg)
         const int rxBytes = uart_read_bytes(UART_NUM_0, uart0_rx_data, RX_BUF_SIZE, 1000 / portTICK_PERIOD_MS);
         if (rxBytes > 0) {
             uart0_rx_data[rxBytes] = 0;
-            ESP_LOGI(RX_TASK_TAG, "Read %d bytes: '%s'", rxBytes, uart0_rx_data);
+            // ESP_LOGI(RX_TASK_TAG, "Read %d bytes: '%s'", rxBytes, uart0_rx_data);
+            ESP_LOGI(RX_TASK_TAG, "Read %d bytes", rxBytes);
             //ESP_LOG_BUFFER_HEXDUMP(RX_TASK_TAG, data, rxBytes, ESP_LOG_INFO);
+        }
+        NMEA0183_GNRMC_Analusis(&GNRMC_Info, (char *)uart0_rx_data);
+        memset(uart0_rx_data, '\0', rxBytes);
+
+        if(fabs(GNRMC_Info.Lati)<1e-6 && fabs(GNRMC_Info.Longi)<1e-6)
+        {
+            memset(show_str, '\0', sizeof(show_str));
+            sprintf(show_str, "Positioning status : %s", "invalid");
+            lv_label_set_text(label_position_status, show_str);
+
+            memset(show_str, '\0', sizeof(show_str));
+            sprintf(show_str, "Pos: %3.5f, %3.5f", -888.88888, -888.88888);
+            lv_label_set_text(label_position, show_str);
+
+        }
+        else
+        {
+            memset(show_str, '\0', sizeof(show_str));
+            sprintf(show_str, "Positioning status : %s", "valid");
+            lv_label_set_text(label_position_status, show_str);
+
+            memset(show_str, '\0', sizeof(show_str));
+            sprintf(show_str, "Pos: %3.5f, %3.5f", GNRMC_Info.Longi, GNRMC_Info.Lati);
+            lv_label_set_text(label_position, show_str);
         }
     }
     free(uart0_rx_data);
@@ -200,68 +270,31 @@ static void uart2_rx_task(void *arg)
             ESP_LOGI(RX_TASK_TAG, "Read %d bytes: '%s'", rxBytes, uart2_rx_data);
             //ESP_LOG_BUFFER_HEXDUMP(RX_TASK_TAG, data, rxBytes, ESP_LOG_INFO);
         }
+        if(rxBytes >= 11)
+        {
+            temperature = (uart2_rx_data[4] - '0')* 10 + (uart2_rx_data[5] - '0');
+            humidity = (uart2_rx_data[8] - '0')* 10 + (uart2_rx_data[9] - '0');
+
+            if(temperature != 0 || humidity != 0)
+            {
+                memset(show_str, '\0', sizeof(show_str));
+                sprintf(show_str, "Temperature : %2d °C", temperature);
+                lv_label_set_text(label_temperature, show_str);
+
+                memset(show_str, '\0', sizeof(show_str));
+                sprintf(show_str, "Huminity : %2d %%", humidity);
+                lv_label_set_text(label_humidity, show_str);
+            }
+        }
     }
     free(uart2_rx_data);
 }
 
-static void lv_tick_task(void *arg)// LVGL 时钟任务
+/* LVGL 时钟任务 */
+static void lv_tick_task(void *arg)
 {
    (void)arg;
    lv_tick_inc(10);
-}
-
-void lv_example_menu(void)
-{
-    lv_obj_t *cont;  // cont容器
-    lv_obj_t *label; // lable标签
-    /*Create a menu object*/
-    lv_obj_t *menu = lv_menu_create(lv_scr_act());                               // 创建菜单对象
-    lv_obj_set_size(menu, lv_disp_get_hor_res(NULL), lv_disp_get_ver_res(NULL)); // 设置大小
-    lv_obj_center(menu);                                                         // 居中显示
-
-    /*Create sub pages*/
-    lv_obj_t *sub_1_page = lv_menu_page_create(menu, "Page 1"); // 创建Page子菜单界面
-
-    cont = lv_menu_cont_create(sub_1_page);              // 创建菜单cont容器对象
-    label = lv_label_create(cont);                       // 创建label
-    lv_label_set_text(label, "Hello, I am hiding here"); // 设置label显示内容
-
-    /*Create sub pages*/
-    lv_obj_t *sub_2_page = lv_menu_page_create(menu, "Page 2"); // 创建Page子菜单界面
-
-    cont = lv_menu_cont_create(sub_2_page);              // 创建菜单cont容器对象
-    label = lv_label_create(cont);                       // 创建label
-    lv_label_set_text(label, "Hello, I am hiding here"); // 设置label显示内容
-
-    lv_obj_t *sub_3_page = lv_menu_page_create(menu, "Page 3"); // 创建Page子菜单界面
-
-    cont = lv_menu_cont_create(sub_3_page);              // 创建菜单cont容器对象
-    label = lv_label_create(cont);                       // 创建label
-    lv_label_set_text(label, "Hello, I am hiding here"); // 设置label显示内容
-    /*Modify the header*/
-    lv_obj_t *back_btn = lv_menu_get_main_header_back_btn(menu); // 获取菜单头部返回键
-    lv_obj_t *back_btn_label = lv_label_create(back_btn);        // 在返回键上创建label
-    lv_label_set_text(back_btn_label, "Back");                   // 设置label显示内容
-
-    /*Create a main page*/
-    lv_obj_t *main_page = lv_menu_page_create(menu, NULL); // 创建菜单主界面
-
-    cont = lv_menu_cont_create(main_page);               // 创建菜单cont容器对象
-    label = lv_label_create(cont);                       // 创建label
-    lv_label_set_text(label, "Item 1 (Click me!)");      // 设置label显示内容
-    lv_menu_set_load_page_event(menu, cont, sub_1_page); // 加载cont到menu,设置跳转界面
-
-    cont = lv_menu_cont_create(main_page);               // 创建菜单主界面
-    label = lv_label_create(cont);                       // 创建菜单cont容器对象
-    lv_label_set_text(label, "Item 2 (Click me!)");      // 设置label显示内容
-    lv_menu_set_load_page_event(menu, cont, sub_2_page); // 加载cont到menu,设置跳转界面
-
-    cont = lv_menu_cont_create(main_page);               // 创建菜单主界面
-    label = lv_label_create(cont);                       // 创建菜单cont容器对象
-    lv_label_set_text(label, "Item 3 (Click me!)");      // 设置label显示内容
-    lv_menu_set_load_page_event(menu, cont, sub_3_page); // 加载cont到menu,设置跳转界面
-
-    lv_menu_set_page(menu, main_page); // 设置菜单主界面
 }
 
 SemaphoreHandle_t xGuiSemaphore;// 创建一个GUI信号量
@@ -309,7 +342,7 @@ static void guiTask(void *pvParameter) {
     ESP_ERROR_CHECK(esp_timer_create(&periodic_timer_args, &periodic_timer));
     ESP_ERROR_CHECK(esp_timer_start_periodic(periodic_timer, 10 * 1000));
 
-    lv_example_menu();
+    menu_init();
 
    while (1)
    {
