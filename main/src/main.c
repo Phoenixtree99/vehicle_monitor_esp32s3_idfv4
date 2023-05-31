@@ -21,8 +21,6 @@
 #define RX_BUF_SIZE 1024
 #define TX_DATA_MAX_SIZE 1024
 
-Mos_Send_Payload_Object_t Send_Payload_Object = NULL;
-
 /* GPS_BD port */
 #define UART0_TXD_PIN (GPIO_NUM_43)
 #define UART0_RXD_PIN (GPIO_NUM_44)
@@ -33,46 +31,53 @@ Mos_Send_Payload_Object_t Send_Payload_Object = NULL;
 
 /* Zigbee port */
 #define UART2_TXD_PIN (GPIO_NUM_17)
-// #define UART2_RXD_PIN (GPIO_NUM_16)
-#define UART2_RXD_PIN (GPIO_NUM_18)
+#define UART2_RXD_PIN (GPIO_NUM_16)
 
 /*--------------------- DEFINE END ---------------------*/
 
 /*-------------------- GLOABLE VERIABLE START --------------------*/
 
-static GNRMC GNRMC_Info;
+GNRMC GNRMC_Info;       // GNRMC报文信息结构体
+BDGSV BDGSV_Info;       // BDGSV报文信息结构体
+GPGSV GPGSV_Info;       // GPGSV报文信息结构体
 
-int temperature = -999;
-int humidity = -999;
+static Mos_Send_Payload_Object sg_Report_Info = {0};    // 发送缓冲区
+
+uint8_t report_info_is_empty = 1;       // 发送缓冲区为空标志位
+
+int temperature = 0;        // 温度
+int humidity = 0;           // 湿度
 
 char show_str[64];
 
-extern lv_obj_t *cont_temperature;  // temperature cont容器
-extern lv_obj_t *label_temperature; // temperature lable标签
+extern lv_obj_t *cont_temperature;      // temperature cont容器
+extern lv_obj_t *label_temperature;     // temperature lable标签
 
-extern lv_obj_t *cont_humidity;  // humidity cont容器
-extern lv_obj_t *label_humidity; // humidity lable标签
+extern lv_obj_t *cont_humidity;         // humidity cont容器
+extern lv_obj_t *label_humidity;        // humidity lable标签
 
-extern lv_obj_t *cont_position;  // latitude cont容器
-extern lv_obj_t *label_position; // latitude lable标签
+extern lv_obj_t *cont_position;         // latitude cont容器
+extern lv_obj_t *label_position;        // latitude lable标签
 
 extern lv_obj_t *cont_position_status;  // longitude cont容器
 extern lv_obj_t *label_position_status; // longitude lable标签
 
-/*--------------------- GLOABLE VERIABLE END ---------------------*/
+extern lv_obj_t *cont_speed;            // speed cont容器
+extern lv_obj_t *label_speed;           // speed lable标签
 
-void Mos_Send_Payload_Object_Init(Mos_Send_Payload_Object_t Send_Payload_Object)
-{
-    strcpy(Send_Payload_Object->method, "report");
-    strcpy(Send_Payload_Object->ClientID , "Truck001");
-    Send_Payload_Object->env_params.temperature = 27.5;
-    Send_Payload_Object->env_params.humidity = 32;
-    Send_Payload_Object->env_params.beidounum = 14;
-    Send_Payload_Object->env_params.gpsnum = 15;
-    Send_Payload_Object->env_params.lon = 130.16412;
-    Send_Payload_Object->env_params.lat = 32.45423;
-    Send_Payload_Object->env_params.speed = 35;
-}
+extern lv_obj_t *cont_sub_beidounum;    // sub_beidounum cont容器
+extern lv_obj_t *label_sub_beidounum;   // sub_beidounum lable标签
+
+extern lv_obj_t *cont_sub_gpsnum;       // sub_gpsnum cont容器
+extern lv_obj_t *label_sub_gpsnum;      // sub_gpsnum lable标签
+
+extern lv_obj_t *ui_Chart2;
+extern lv_coord_t ui_Chart2_series_1_array[];
+extern lv_coord_t ui_Chart2_series_2_array[];
+extern lv_chart_series_t* ui_Chart2_series_1;
+extern lv_chart_series_t* ui_Chart2_series_2;
+
+/*--------------------- GLOABLE VERIABLE END ---------------------*/
 
 /*  UART1、UART2 和 UART3 串口初始化*/
 void uart_init(void) {
@@ -119,25 +124,54 @@ void uart_init(void) {
     uart_set_pin(UART_NUM_2, UART2_TXD_PIN, UART2_RXD_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
 }
 
-int serialize_string_to_jsom(char *pstr, Mos_Send_Payload_Object_t Send_Payload_Object)
+int serialize_string_to_json(char *pReportBuf, int length, Mos_Send_Payload_Object_t Send_Payload_Object)
 {
-    //char str[TX_DATA_MAX_SIZE];
-    sprintf(pstr,"{\"method\":\"%s\",\"clientID\":\"%s\",\"params\":{\"temperature\":%.1f, \
-    \"humidity\":%d,\"beidounum\":%d,\"gpsnum\":%d,\"long\":%3.5f,\"lati\":%3.5f,\"speed\":%d}}",   \
-    Send_Payload_Object->method, Send_Payload_Object->ClientID, Send_Payload_Object->env_params.temperature,    \
-    Send_Payload_Object->env_params.humidity, Send_Payload_Object->env_params.beidounum,    \
-    Send_Payload_Object->env_params.gpsnum, Send_Payload_Object->env_params.lon,    \
-    Send_Payload_Object->env_params.lat, Send_Payload_Object->env_params.speed);
-    return strlen(pstr);
-}
+    if(report_info_is_empty == 1)
+    {
+        return 0;
+    }
 
-/* 串口0发送数据 */
-int uart0_sendData(const char* logName, const char* data)
-{
-    const int len = strlen(data);
-    const int txBytes = uart_write_bytes(UART_NUM_0, data, len);
-    ESP_LOGI(logName, "Wrote %d bytes", txBytes);
-    return txBytes;
+    int json_doc_length = 0;
+    int insert_count = 0;
+    
+    /* clean data */
+    memset(pReportBuf, '\0', length);
+
+    /* Head */
+    insert_count = sprintf(pReportBuf, "{\"method\":\"%s\",\"clientID\":\"%s\",\"params\":{", 
+            Send_Payload_Object->method, Send_Payload_Object->ClientID);
+    json_doc_length += insert_count;
+
+    /* fill params */
+    if(Send_Payload_Object->env_params.temperature != 0 || Send_Payload_Object->env_params.humidity != 0)
+    {
+        pReportBuf = pReportBuf + strlen(pReportBuf);
+        insert_count = sprintf(pReportBuf, "\"temperature\":%d, \"humidity\":%d,", 
+                Send_Payload_Object->env_params.temperature, Send_Payload_Object->env_params.humidity);
+        json_doc_length += insert_count;
+    }
+    
+
+    pReportBuf = pReportBuf + strlen(pReportBuf);
+    insert_count = sprintf(pReportBuf, "\"beidounum\":%d, \"gpsnum\":%d,", 
+            Send_Payload_Object->env_params.beidounum, Send_Payload_Object->env_params.gpsnum);
+    json_doc_length += insert_count;
+
+    if (GNRMC_Info.PosStatus == 'A')
+    {
+        pReportBuf = pReportBuf + strlen(pReportBuf);
+        insert_count = sprintf(pReportBuf, "\"lon\":%3.5f,\"lat\":%3.5f,\"speed\":%d,", 
+                TurnToStdCoord(Send_Payload_Object->env_params.lon),
+                TurnToStdCoord(Send_Payload_Object->env_params.lat),
+                (int)(Send_Payload_Object->env_params.speed * 1.852));
+        json_doc_length += insert_count;
+    }
+
+    pReportBuf = pReportBuf + strlen(pReportBuf) - 1;
+    insert_count = sprintf(pReportBuf, "}}");
+    json_doc_length += insert_count;
+    
+    return json_doc_length;
 }
 
 /* 串口1发送数据 */
@@ -145,28 +179,8 @@ int uart1_sendData(const char* logName, const char* data)
 {
     const int len = strlen(data);
     const int txBytes = uart_write_bytes(UART_NUM_1, data, len);
-    ESP_LOGI(logName, "Wrote %d bytes", txBytes);
+    ESP_LOGI(logName, "Wrote %d bytes %s", txBytes, data);
     return txBytes;
-}
-
-/* 串口2发送数据 */
-int uart2_sendData(const char* logName, const char* data)
-{
-    const int len = strlen(data);
-    const int txBytes = uart_write_bytes(UART_NUM_2, data, len);
-    ESP_LOGI(logName, "Wrote %d bytes", txBytes);
-    return txBytes;
-}
-
-/* 串口0发送任务 */
-static void uart0_tx_task(void *arg)
-{
-    static const char *TX_TASK_TAG = "UART0_TX_TASK";
-    esp_log_level_set(TX_TASK_TAG, ESP_LOG_INFO);
-    while (1) {
-        uart0_sendData(TX_TASK_TAG, "Hello world abc");
-        vTaskDelay(2000 / portTICK_PERIOD_MS);
-    }
 }
 
 /* 串口1发送任务 */
@@ -175,26 +189,16 @@ static void uart1_tx_task(void *arg)
     static const char *TX_TASK_TAG = "UART1_TX_TASK";
     esp_log_level_set(TX_TASK_TAG, ESP_LOG_INFO);
 
-    // static char json_string[TX_DATA_MAX_SIZE];
-    // Send_Payload_Object = (Mos_Send_Payload_Object_t)pvPortMalloc(sizeof(Mos_Send_Payload_Object));
-    // Mos_Send_Payload_Object_Init(Send_Payload_Object);
+    static char report_buff[256];
+
+    /* 初始化Report Info */
+    Mos_Send_Payload_Object_Init(&sg_Report_Info);
 
     while (1) {
-        // Mos_Send_Payload_Object_Init(Send_Payload_Object);
-        // serialize_string_to_jsom(json_string, Send_Payload_Object);
-        uart1_sendData(TX_TASK_TAG, "Hello world");
-        vTaskDelay(2000 / portTICK_PERIOD_MS);
-    }
-}
-
-/* 串口2发送任务 */
-static void uart2_tx_task(void *arg)
-{
-    static const char *TX_TASK_TAG = "UART2_TX_TASK";
-    esp_log_level_set(TX_TASK_TAG, ESP_LOG_INFO);    
-    while (1) {  
-        //uart2_sendData(TX_TASK_TAG, "Hello world");
-        vTaskDelay(8000 / portTICK_PERIOD_MS);
+        Mos_Send_Payload_Object_Reflesh(&sg_Report_Info);
+        serialize_string_to_json(report_buff, sizeof(report_buff), &sg_Report_Info);
+        uart1_sendData(TX_TASK_TAG, report_buff);
+        vTaskDelay(5000 / portTICK_PERIOD_MS);
     }
 }
 
@@ -213,7 +217,19 @@ static void uart0_rx_task(void *arg)
             //ESP_LOG_BUFFER_HEXDUMP(RX_TASK_TAG, data, rxBytes, ESP_LOG_INFO);
         }
         NMEA0183_GNRMC_Analusis(&GNRMC_Info, (char *)uart0_rx_data);
+        NMEA0183_BDGSV_Analysis(&BDGSV_Info, (char *)uart0_rx_data);
+        NMEA0183_GPGSV_Analysis(&GPGSV_Info, (char *)uart0_rx_data);
         memset(uart0_rx_data, '\0', rxBytes);
+
+        report_info_is_empty = 0;
+
+        memset(show_str, '\0', sizeof(show_str));
+        sprintf(show_str, "Beidou : %d", BDGSV_Info.BD_SAT_Number);
+        lv_label_set_text(label_sub_beidounum, show_str);
+
+        memset(show_str, '\0', sizeof(show_str));
+        sprintf(show_str, "GPS : %d", GPGSV_Info.GPS_SAT_Number);
+        lv_label_set_text(label_sub_gpsnum, show_str);
 
         if(fabs(GNRMC_Info.Lati)<1e-6 && fabs(GNRMC_Info.Longi)<1e-6)
         {
@@ -222,9 +238,12 @@ static void uart0_rx_task(void *arg)
             lv_label_set_text(label_position_status, show_str);
 
             memset(show_str, '\0', sizeof(show_str));
-            sprintf(show_str, "Pos: %3.5f, %3.5f", -888.88888, -888.88888);
+            sprintf(show_str, "Position : %s", "--, --");
             lv_label_set_text(label_position, show_str);
 
+            memset(show_str, '\0', sizeof(show_str));
+            sprintf(show_str, "Speed : %s", "--");
+            lv_label_set_text(label_speed, show_str);
         }
         else
         {
@@ -233,28 +252,16 @@ static void uart0_rx_task(void *arg)
             lv_label_set_text(label_position_status, show_str);
 
             memset(show_str, '\0', sizeof(show_str));
-            sprintf(show_str, "Pos: %3.5f, %3.5f", GNRMC_Info.Longi, GNRMC_Info.Lati);
+            sprintf(show_str, "Position : %3.5f, %3.5f", TurnToStdCoord(GNRMC_Info.Longi),
+                    TurnToStdCoord(GNRMC_Info.Lati));
             lv_label_set_text(label_position, show_str);
+
+            memset(show_str, '\0', sizeof(show_str));
+            sprintf(show_str, "Speed : %d km/h", (int)(GNRMC_Info.SpeedKont * 1.852));
+            lv_label_set_text(label_speed, show_str);
         }
     }
     free(uart0_rx_data);
-}
-
-/* 串口1接收任务 */
-static void uart1_rx_task(void *arg)
-{
-    static const char *RX_TASK_TAG = "UART1_RX_TASK";
-    esp_log_level_set(RX_TASK_TAG, ESP_LOG_INFO);
-    uint8_t* uart1_rx_data = (uint8_t*) malloc(RX_BUF_SIZE+1);
-    while (1) {
-        const int rxBytes = uart_read_bytes(UART_NUM_1, uart1_rx_data, RX_BUF_SIZE, 1000 / portTICK_PERIOD_MS);
-        if (rxBytes > 0) {
-            uart1_rx_data[rxBytes] = 0;
-            ESP_LOGI(RX_TASK_TAG, "Read %d bytes: '%s'", rxBytes, uart1_rx_data);
-            //ESP_LOG_BUFFER_HEXDUMP(RX_TASK_TAG, data, rxBytes, ESP_LOG_INFO);
-        }
-    }
-    free(uart1_rx_data);
 }
 
 /* 串口2接收任务 */
@@ -263,6 +270,9 @@ static void uart2_rx_task(void *arg)
     static const char *RX_TASK_TAG = "UART2_RX_TASK";
     esp_log_level_set(RX_TASK_TAG, ESP_LOG_INFO);
     uint8_t* uart2_rx_data = (uint8_t*) malloc(RX_BUF_SIZE+1);
+
+    uint8_t no_recv_zigbee_data_count = 0;
+
     while (1) {
         const int rxBytes = uart_read_bytes(UART_NUM_2, uart2_rx_data, RX_BUF_SIZE, 1000 / portTICK_PERIOD_MS);
         if (rxBytes > 0) {
@@ -272,10 +282,15 @@ static void uart2_rx_task(void *arg)
         }
         if(rxBytes >= 11)
         {
+            no_recv_zigbee_data_count = 0;
+
             temperature = (uart2_rx_data[4] - '0')* 10 + (uart2_rx_data[5] - '0');
             humidity = (uart2_rx_data[8] - '0')* 10 + (uart2_rx_data[9] - '0');
 
-            if(temperature != 0 || humidity != 0)
+            report_info_is_empty = 0;
+
+            if((temperature != 0 || humidity != 0) && 
+            temperature < 60 && temperature > -20 && humidity > 0 && humidity < 100)
             {
                 memset(show_str, '\0', sizeof(show_str));
                 sprintf(show_str, "Temperature : %2d °C", temperature);
@@ -284,6 +299,51 @@ static void uart2_rx_task(void *arg)
                 memset(show_str, '\0', sizeof(show_str));
                 sprintf(show_str, "Huminity : %2d %%", humidity);
                 lv_label_set_text(label_humidity, show_str);
+
+                for(int i = 0; i<9; i++)
+                {
+                    ui_Chart2_series_1_array[i] = ui_Chart2_series_1_array[i+1];
+                }
+                ui_Chart2_series_1_array[9] = temperature;
+
+                for(int i = 0; i<9; i++)
+                {
+                    ui_Chart2_series_2_array[i] = ui_Chart2_series_2_array[i+1];
+                }
+                ui_Chart2_series_2_array[9] = humidity;
+
+                lv_chart_set_ext_y_array(ui_Chart2, ui_Chart2_series_2, ui_Chart2_series_2_array);
+            }
+        }
+        else
+        {
+            no_recv_zigbee_data_count++;
+            if(no_recv_zigbee_data_count >= 5)
+            {
+                temperature = 0;
+                humidity = 0;
+
+                memset(show_str, '\0', sizeof(show_str));
+                sprintf(show_str, "Temperature : -- °C");
+                lv_label_set_text(label_temperature, show_str);
+
+                memset(show_str, '\0', sizeof(show_str));
+                sprintf(show_str, "Huminity : -- %%");
+                lv_label_set_text(label_humidity, show_str);
+
+                for(int i = 0; i<9; i++)
+                {
+                    ui_Chart2_series_1_array[i] = ui_Chart2_series_1_array[i+1];
+                }
+                ui_Chart2_series_1_array[9] = 0;
+
+                for(int i = 0; i<9; i++)
+                {
+                    ui_Chart2_series_2_array[i] = ui_Chart2_series_2_array[i+1];
+                }
+                ui_Chart2_series_2_array[9] = 0;
+
+                lv_chart_set_ext_y_array(ui_Chart2, ui_Chart2_series_2, ui_Chart2_series_2_array);
             }
         }
     }
@@ -309,8 +369,6 @@ static void guiTask(void *pvParameter) {
     lvgl_driver_init(); // 初始化液晶驱动
     
     // 初始化缓存
-    // lv_color_t *buf1 = heap_caps_malloc(DISP_BUF_SIZE * 2, MALLOC_CAP_DMA);
-    // lv_color_t *buf2 = heap_caps_malloc(DISP_BUF_SIZE * 2, MALLOC_CAP_DMA);
     lv_color_t *buf1 = heap_caps_malloc(DISP_BUF_SIZE * sizeof(lv_color_t), MALLOC_CAP_DMA);
     lv_color_t *buf2 = heap_caps_malloc(DISP_BUF_SIZE * sizeof(lv_color_t), MALLOC_CAP_DMA);
 
@@ -368,12 +426,12 @@ static void guiTask(void *pvParameter) {
 void app_main(void)
 {
     uart_init();
+
     xTaskCreate(uart0_rx_task, "uart0_rx_task", 1024*2, NULL, configMAX_PRIORITIES, NULL);
-    xTaskCreate(uart0_tx_task, "uart0_tx_task", 1024*2, NULL, configMAX_PRIORITIES-1, NULL);
-    xTaskCreate(uart1_rx_task, "uart1_rx_task", 1024*2, NULL, configMAX_PRIORITIES, NULL);
+
     xTaskCreate(uart1_tx_task, "uart1_tx_task", 1024*2, NULL, configMAX_PRIORITIES-1, NULL);
-    xTaskCreate(uart2_rx_task, "uart2_rx_task", 1024*2, NULL, configMAX_PRIORITIES, NULL);
-    xTaskCreate(uart2_tx_task, "uart2_tx_task", 1024*2, NULL, configMAX_PRIORITIES-1, NULL);
+
+    xTaskCreate(uart2_rx_task, "uart2_rx_task", 1024*2, NULL, configMAX_PRIORITIES-2, NULL);
 
     xTaskCreatePinnedToCore(guiTask, "gui", 1024 * 4, NULL, 1, NULL, 0);
 }

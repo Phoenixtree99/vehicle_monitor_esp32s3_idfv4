@@ -7,17 +7,34 @@
 
 /*-------------------- GLOABLE VERIABLE START --------------------*/
 
-lv_obj_t *cont_temperature;  // temperature cont容器
-lv_obj_t *label_temperature; // temperature lable标签
+lv_obj_t *cont_temperature;         // temperature cont容器
+lv_obj_t *label_temperature;        // temperature lable标签
 
-lv_obj_t *cont_humidity;  // humidity cont容器
-lv_obj_t *label_humidity; // humidity lable标签
+lv_obj_t *cont_humidity;            // humidity cont容器
+lv_obj_t *label_humidity;           // humidity lable标签
 
-lv_obj_t *cont_position;  // latitude cont容器
-lv_obj_t *label_position; // latitude lable标签
+lv_obj_t *cont_position;            // latitude cont容器
+lv_obj_t *label_position;           // latitude lable标签
 
-lv_obj_t *cont_position_status;  // longitude cont容器
-lv_obj_t *label_position_status; // longitude lable标签
+lv_obj_t *cont_position_status;     // longitude cont容器
+lv_obj_t *label_position_status;    // longitude lable标签
+
+lv_obj_t *cont_speed;               // speed cont容器
+lv_obj_t *label_speed;              // speed lable标签
+
+lv_obj_t *cont_sub_beidounum;       // sub_beidounum cont容器
+lv_obj_t *label_sub_beidounum;      // sub_beidounum lable标签
+
+lv_obj_t *cont_sub_gpsnum;          // sub_gpsnum cont容器
+lv_obj_t *label_sub_gpsnum;         // sub_gpsnum lable标签
+
+lv_coord_t ui_Chart2_series_1_array[] = {0,0,0,0,0,0,0,0,0,0};
+lv_coord_t ui_Chart2_series_2_array[] = {0,0,0,0,0,0,0,0,0,0};
+
+lv_chart_series_t* ui_Chart2_series_1;
+lv_chart_series_t* ui_Chart2_series_2;
+
+lv_obj_t *ui_Chart2;                // chart对象
 
 extern char show_str[64];
 
@@ -41,20 +58,25 @@ void menu_init(void)
     /* ------------------------------------------------------------------------- */
 
     /* 2-1 温湿度详情 sub pages */
+
     lv_obj_t *sub_1_page = lv_menu_page_create(menu, "Temperature & Humidity"); // 创建Page子菜单界面
 
     cont = lv_menu_cont_create(sub_1_page);
-    label = lv_label_create(cont);
-    lv_label_set_recolor(label, true);							// 使能字符命令重新对字符上色
-    //lv_obj_set_align(label, LV_FLEX_ALIGN_CENTER);			// 内容居中对齐
-    lv_label_set_text(label, "#ff0000 Temperature : 23#");
-    lv_obj_set_height(label, 20);
-    //lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);		// 对齐到中心偏上
-
-    cont = lv_menu_cont_create(sub_1_page);
-    label = lv_label_create(cont);
-    lv_label_set_recolor(label, true);
-    lv_label_set_text(label, "#0000ff Humidity : 65#");
+    ui_Chart2 = lv_chart_create(sub_1_page);
+    lv_obj_set_width( ui_Chart2, 230);
+    lv_obj_set_height( ui_Chart2, 140);
+    // lv_obj_set_x( ui_Chart2, 0 );
+    // lv_obj_set_y( ui_Chart2, 12 );
+    lv_obj_set_align( ui_Chart2, LV_ALIGN_CENTER );
+    lv_chart_set_type( ui_Chart2, LV_CHART_TYPE_LINE);
+    lv_chart_set_range( ui_Chart2, LV_CHART_AXIS_PRIMARY_Y, -15, 45);
+    lv_chart_set_axis_tick( ui_Chart2, LV_CHART_AXIS_PRIMARY_X, 10, 10, 10, 1, true, 50);
+    lv_chart_set_axis_tick( ui_Chart2, LV_CHART_AXIS_PRIMARY_Y, 10, 5, 5, 5, true, 50);
+    lv_chart_set_axis_tick( ui_Chart2, LV_CHART_AXIS_SECONDARY_Y, 10, 5, 5, 5, true, 25);
+    ui_Chart2_series_1 = lv_chart_add_series(ui_Chart2, lv_color_hex(0xFF0000), LV_CHART_AXIS_PRIMARY_Y);
+    lv_chart_set_ext_y_array(ui_Chart2, ui_Chart2_series_1, ui_Chart2_series_1_array);
+    ui_Chart2_series_2 = lv_chart_add_series(ui_Chart2, lv_color_hex(0x0000FF), LV_CHART_AXIS_SECONDARY_Y);
+    lv_chart_set_ext_y_array(ui_Chart2, ui_Chart2_series_2, ui_Chart2_series_2_array);
 
     /* ------------------------------------------------------------------------- */
 
@@ -63,11 +85,15 @@ void menu_init(void)
 
     cont = lv_menu_cont_create(sub_2_page);
     label = lv_label_create(cont);
-    lv_label_set_text(label, "Beidou : 12");
+    cont_sub_beidounum = cont;
+    label_sub_beidounum = label;
+    lv_label_set_text(label, "Beidou : --");
 
     cont = lv_menu_cont_create(sub_2_page);
     label = lv_label_create(cont);
-    lv_label_set_text(label, "GPS : 14");
+    cont_sub_gpsnum = cont;
+    label_sub_gpsnum = label;
+    lv_label_set_text(label, "GPS : --");
 
     /* ------------------------------------------------------------------------- */
 
@@ -139,9 +165,21 @@ void menu_init(void)
     cont_position = cont;
     label_position = label;
     memset(show_str, '\0', sizeof(show_str));
-    sprintf(show_str, "Pos: %3.5f, %3.5f",-999.99999, -999.99999);
+    sprintf(show_str, "Position : %3.5f, %3.5f", 000.00000, 000.00000);
     lv_label_set_text(label, show_str);
-    lv_menu_set_load_page_event(menu, cont, sub_3_page); // 加载cont到menu,设置跳转界面
+    // lv_menu_set_load_page_event(menu, cont, sub_3_page); // 加载cont到menu,设置跳转界面
+
+    /* ------------------------------------------------------------------------- */
+
+    /* 4-5 速度栏 */
+    cont = lv_menu_cont_create(main_page);               // 创建菜单主界面
+    label = lv_label_create(cont);                       // 创建菜单cont容器对象
+    cont_speed = cont;
+    label_speed = label;
+    memset(show_str, '\0', sizeof(show_str));
+    sprintf(show_str, "Speed : %s", "--");
+    lv_label_set_text(label, show_str);
+    // lv_menu_set_load_page_event(menu, cont, sub_3_page); // 加载cont到menu,设置跳转界面
 
     /* ------------------------------------------------------------------------- */
 

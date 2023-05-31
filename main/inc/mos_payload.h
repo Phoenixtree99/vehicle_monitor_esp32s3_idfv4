@@ -4,7 +4,7 @@
 
 typedef struct params
 {
-    float temperature;
+    int temperature;
     int humidity;
     int beidounum;
     int gpsnum;
@@ -19,3 +19,9 @@ typedef struct mos_send_payload_object
     char ClientID[32];
     Params env_params;
 } Mos_Send_Payload_Object, *Mos_Send_Payload_Object_t;
+
+float TurnToStdCoord(float coord);
+
+void Mos_Send_Payload_Object_Init(Mos_Send_Payload_Object_t Send_Payload_Object);
+
+void Mos_Send_Payload_Object_Reflesh(Mos_Send_Payload_Object_t Send_Payload_Object);
